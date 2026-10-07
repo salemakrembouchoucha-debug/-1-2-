@@ -11,19 +11,14 @@ import { DragDropMode } from './components/DragDropMode';
 import { EssayMode } from './components/EssayMode';
 import { MCQBankMode } from './components/MCQBankMode';
 import { SummaryMode } from './components/SummaryMode';
-import { StudentsRecordsView } from './components/StudentsRecordsView';
-import { AppMode, StudentProfile, StudentSubmission } from './types';
+import { AppMode, StudentProfile } from './types';
 import { AlrayyanLogo, QatarMoELogo } from './components/Logos';
 import { playSuccessSound } from './utils/audio';
-import { getStoredSubmissions, saveNewSubmission } from './utils/studentStorage';
 
 const STORAGE_KEY_STUDENT = 'alrayyan_science_student_v1';
 
 export default function App() {
-  const [currentMode, setCurrentMode] = useState<AppMode>('students_list');
-  const [submissions, setSubmissions] = useState<StudentSubmission[]>(() =>
-    getStoredSubmissions()
-  );
+  const [currentMode, setCurrentMode] = useState<AppMode>('adventure');
 
   const [student, setStudent] = useState<StudentProfile>(() => {
     try {
@@ -53,17 +48,6 @@ export default function App() {
       // ignore
     }
   }, [student]);
-
-  const refreshSubmissions = () => {
-    setSubmissions(getStoredSubmissions());
-  };
-
-  const handleRecordSubmission = (
-    subData: Omit<StudentSubmission, 'id' | 'timestamp' | 'formattedDate'>
-  ) => {
-    saveNewSubmission(subData);
-    refreshSubmissions();
-  };
 
   const handleUpdateScore = (points: number) => {
     setStudent((prev) => ({
@@ -98,25 +82,14 @@ export default function App() {
         student={student}
         onUpdateStudent={handleUpdateStudent}
         onResetProgress={handleResetProgress}
-        studentsCount={submissions.length}
       />
 
       {/* Main Content Area based on Mode */}
       <main className="flex-1 w-full pb-12">
-        {currentMode === 'students_list' && (
-          <StudentsRecordsView
-            submissions={submissions}
-            onRefreshSubmissions={refreshSubmissions}
-            onNavigateToAssessment={() => setCurrentMode('assessment')}
-          />
-        )}
-
         {currentMode === 'assessment' && (
           <AssessmentMode
             student={student}
             onUpdateScore={handleUpdateScore}
-            onRecordSubmission={handleRecordSubmission}
-            onNavigateToStudentsList={() => setCurrentMode('students_list')}
           />
         )}
 

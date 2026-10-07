@@ -70,36 +70,11 @@ export interface StudentProfile {
   badges?: string[];
 }
 
-export interface StudentSubmission {
-  id: string;
-  studentName: string;
-  section: string;
-  activityType: 'assessment' | 'adventure' | 'practice_mcq' | 'practice_essay' | 'drag_drop';
-  activityTitle: string;
-  score: number;
-  maxScore: number;
-  percentage: number;
-  correctCount: number;
-  totalQuestions: number;
-  timestamp: string;
-  formattedDate: string;
-  timeSpentMinutes?: number;
-  status: 'ممتاز' | 'جيد جداً' | 'جيد' | 'مقبول' | 'بحاجة لمتابعة';
-  details?: {
-    questionNumber: number;
-    questionText: string;
-    studentAnswer: string;
-    correctAnswer: string;
-    isCorrect: boolean;
-  }[];
-}
-
 export type AppMode =
   | 'adventure'
   | 'assessment'
   | 'drag_drop'
   | 'practice_essay'
   | 'practice_mcq'
-  | 'summary'
-  | 'students_list';
+  | 'summary';
 
