@@ -11,15 +11,20 @@ import { DragDropMode } from './components/DragDropMode';
 import { EssayMode } from './components/EssayMode';
 import { MCQBankMode } from './components/MCQBankMode';
 import { SummaryMode } from './components/SummaryMode';
-import { AppMode, StudentProfile } from './types';
+import { StudentsRecordsView } from './components/StudentsRecordsView';
+import { AppMode, StudentProfile, StudentSubmission } from './types';
 import { AlrayyanLogo, QatarMoELogo } from './components/Logos';
-import { Sparkles, Trophy, BookOpen, Layers, Award } from 'lucide-react';
 import { playSuccessSound } from './utils/audio';
+import { getStoredSubmissions, saveNewSubmission } from './utils/studentStorage';
 
 const STORAGE_KEY_STUDENT = 'alrayyan_science_student_v1';
 
 export default function App() {
-  const [currentMode, setCurrentMode] = useState<AppMode>('adventure');
+  const [currentMode, setCurrentMode] = useState<AppMode>('students_list');
+  const [submissions, setSubmissions] = useState<StudentSubmission[]>(() =>
+    getStoredSubmissions()
+  );
+
   const [student, setStudent] = useState<StudentProfile>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_STUDENT);
@@ -34,9 +39,9 @@ export default function App() {
       // fallback
     }
     return {
-      name: 'طالب الريان المتميز',
+      name: 'سالم أكرم بوشوشة',
       section: 'الصف الثامن / 1',
-      score: 0,
+      score: 310,
     };
   });
 
@@ -48,6 +53,17 @@ export default function App() {
       // ignore
     }
   }, [student]);
+
+  const refreshSubmissions = () => {
+    setSubmissions(getStoredSubmissions());
+  };
+
+  const handleRecordSubmission = (
+    subData: Omit<StudentSubmission, 'id' | 'timestamp' | 'formattedDate'>
+  ) => {
+    saveNewSubmission(subData);
+    refreshSubmissions();
+  };
 
   const handleUpdateScore = (points: number) => {
     setStudent((prev) => ({
@@ -75,23 +91,37 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50/70 via-yellow-50/40 to-slate-100 flex flex-col font-['Cairo',sans-serif] text-slate-800" dir="rtl">
-      {/* Universal Top Header with Qatar & Al-Rayyan Logos */}
+      {/* Universal Top Header with Qatar & Al-Rayyan Names Only (No Logos) */}
       <Header
         currentMode={currentMode}
         onSelectMode={setCurrentMode}
         student={student}
         onUpdateStudent={handleUpdateStudent}
         onResetProgress={handleResetProgress}
+        studentsCount={submissions.length}
       />
 
       {/* Main Content Area based on Mode */}
       <main className="flex-1 w-full pb-12">
-        {currentMode === 'adventure' && (
-          <AdventureMode student={student} onUpdateScore={handleUpdateScore} />
+        {currentMode === 'students_list' && (
+          <StudentsRecordsView
+            submissions={submissions}
+            onRefreshSubmissions={refreshSubmissions}
+            onNavigateToAssessment={() => setCurrentMode('assessment')}
+          />
         )}
 
         {currentMode === 'assessment' && (
-          <AssessmentMode student={student} onUpdateScore={handleUpdateScore} />
+          <AssessmentMode
+            student={student}
+            onUpdateScore={handleUpdateScore}
+            onRecordSubmission={handleRecordSubmission}
+            onNavigateToStudentsList={() => setCurrentMode('students_list')}
+          />
+        )}
+
+        {currentMode === 'adventure' && (
+          <AdventureMode student={student} onUpdateScore={handleUpdateScore} />
         )}
 
         {currentMode === 'drag_drop' && (
@@ -109,19 +139,11 @@ export default function App() {
         {currentMode === 'summary' && <SummaryMode />}
       </main>
 
-      {/* Bottom Footer */}
+      {/* Bottom Footer - Names Only (No Graphic Logos) */}
       <footer className="bg-white border-t-2 border-amber-300 py-6 px-4 mt-auto">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-right">
           <div className="flex items-center gap-3">
-            <AlrayyanLogo className="h-10" variant="compact" />
-            <div>
-              <div className="font-black text-xs sm:text-sm text-amber-950">
-                مدرسة الريان الخاصة • قسم العلوم
-              </div>
-              <div className="text-[11px] font-bold text-amber-800">
-                منهج العلوم المعتمد لدولة قطر • الصف الثامن الإعدادي
-              </div>
-            </div>
+            <AlrayyanLogo variant="compact" />
           </div>
 
           <div className="text-center text-xs text-slate-500 font-bold">
@@ -131,11 +153,10 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2 text-xs">
-            <QatarMoELogo className="h-9" variant="compact" />
+            <QatarMoELogo variant="compact" />
           </div>
         </div>
       </footer>
     </div>
   );
 }
-

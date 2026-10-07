@@ -77,15 +77,15 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
           <div className="absolute inset-3 border-2 border-amber-300 rounded-2xl pointer-events-none" />
           <div className="absolute inset-5 border border-dashed border-amber-400/70 rounded-xl pointer-events-none" />
 
-          {/* Top Logos Row */}
+          {/* Top Names Row (No logos, names only) */}
           <div className="flex items-center justify-between gap-4 mb-6 border-b border-amber-200/80 pb-4">
-            <QatarMoELogo className="h-12" variant="compact" />
+            <QatarMoELogo variant="compact" />
             <div className="text-center">
               <span className="inline-block px-3 py-1 bg-amber-100 border border-amber-300 rounded-full text-amber-950 text-xs font-black">
                 قسم العلوم - مدرسة الريان الخاصة
               </span>
             </div>
-            <AlrayyanLogo className="h-12" variant="compact" />
+            <AlrayyanLogo variant="compact" />
           </div>
 
           {/* Certificate Heading */}

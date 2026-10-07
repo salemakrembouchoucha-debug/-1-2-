@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AlrayyanLogo, QatarMoELogo } from './Logos';
-import { Volume2, VolumeX, Sparkles, Award, User, RefreshCw } from 'lucide-react';
+import { Volume2, VolumeX, Sparkles, Award, User, RefreshCw, Users } from 'lucide-react';
 import { getAudioMute, toggleAudioMute, playClickSound } from '../utils/audio';
 import { AppMode, StudentProfile } from '../types';
 
@@ -10,6 +10,7 @@ interface HeaderProps {
   student: StudentProfile;
   onUpdateStudent: (updated: Partial<StudentProfile>) => void;
   onResetProgress: () => void;
+  studentsCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -18,6 +19,7 @@ export const Header: React.FC<HeaderProps> = ({
   student,
   onUpdateStudent,
   onResetProgress,
+  studentsCount = 0,
 }) => {
   const [muted, setMuted] = useState(getAudioMute());
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -41,11 +43,11 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="bg-white border-b-2 border-amber-300 shadow-sm sticky top-0 z-40">
-      {/* Top Banner: Logos and School Identity */}
+      {/* Top Banner: School and Ministry Names (No Logos/Emblems, Names Only) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-4">
-        {/* Qatar Ministry of Education Logo */}
+        {/* Qatar Ministry of Education - Text Name Only */}
         <div className="order-1 flex items-center">
-          <QatarMoELogo className="h-12 sm:h-14" variant="full" />
+          <QatarMoELogo variant="full" />
         </div>
 
         {/* Center Tagline with Yellow Accent */}
@@ -59,17 +61,17 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Alrayyan Private Schools Logo */}
+        {/* Alrayyan Private Schools - Text Name Only */}
         <div className="order-2 md:order-3 flex items-center">
-          <AlrayyanLogo className="h-12 sm:h-14" variant="full" />
+          <AlrayyanLogo variant="full" />
         </div>
       </div>
 
       {/* Secondary Bar: Student Stats & Navigation Modes */}
       <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-100 border-t border-amber-200 px-4 sm:px-6 py-2">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-          {/* Student Badge & Quick Edit */}
-          <div className="flex items-center gap-3">
+          {/* Student Badge & Quick Edit & Student Records shortcut */}
+          <div className="flex items-center gap-2.5">
             <button
               id="student-profile-button"
               onClick={() => setShowEditProfile(true)}
@@ -95,6 +97,26 @@ export const Header: React.FC<HeaderProps> = ({
               <span>النقاط: {student.score}</span>
             </div>
 
+            {/* Quick Students List Button */}
+            <button
+              onClick={() => {
+                playClickSound();
+                onSelectMode('students_list');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-bold text-xs transition-all cursor-pointer ${
+                currentMode === 'students_list'
+                  ? 'bg-amber-500 text-amber-950 border-amber-600 shadow-sm'
+                  : 'bg-white text-slate-700 hover:bg-amber-100 border-amber-300'
+              }`}
+              title="عرض قائمة وسجل الطلبة الذين حلوا الأسئلة"
+            >
+              <Users className="w-4 h-4 text-amber-700" />
+              <span className="hidden sm:inline">سجل الطلبة</span>
+              <span className="px-1.5 py-0.2 bg-amber-200 text-amber-900 rounded-full text-[10px] font-black">
+                {studentsCount}
+              </span>
+            </button>
+
             {/* Sound Toggle */}
             <button
               id="sound-toggle-button"
@@ -119,8 +141,9 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Mode Navigation Tabs */}
           <nav className="flex items-center gap-1.5 overflow-x-auto py-1 max-w-full">
             {[
-              { id: 'adventure', label: '🎮 لعبة التحدي' },
+              { id: 'students_list', label: '👥 قائمة وسجل الطلبة' },
               { id: 'assessment', label: '📝 محاكاة التقييم الإلكتروني' },
+              { id: 'adventure', label: '🎮 لعبة التحدي' },
               { id: 'drag_drop', label: '🧲 سحب وإدراج' },
               { id: 'practice_essay', label: '✍️ الأسئلة المقالية' },
               { id: 'practice_mcq', label: '📋 بنك الاختيار من متعدد' },

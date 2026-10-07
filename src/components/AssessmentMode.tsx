@@ -20,16 +20,25 @@ import {
   ChevronLeft,
   FileCheck,
   Sparkles,
+  Users,
+  CheckCircle2,
 } from 'lucide-react';
+import { StudentSubmission } from '../types';
 
 interface AssessmentModeProps {
   student: StudentProfile;
   onUpdateScore: (points: number) => void;
+  onRecordSubmission?: (
+    sub: Omit<StudentSubmission, 'id' | 'timestamp' | 'formattedDate'>
+  ) => void;
+  onNavigateToStudentsList?: () => void;
 }
 
 export const AssessmentMode: React.FC<AssessmentModeProps> = ({
   student,
   onUpdateScore,
+  onRecordSubmission,
+  onNavigateToStudentsList,
 }) => {
   // Test set: All 32 MCQs from both units
   const questions = ALL_MCQS;
@@ -115,6 +124,51 @@ export const AssessmentMode: React.FC<AssessmentModeProps> = ({
     const correctCount = calculateScore();
     const finalScore = correctCount * 10;
     onUpdateScore(finalScore);
+
+    // Calculate percentage and status
+    const pct = Math.round((correctCount / totalQuestions) * 100);
+    let status: StudentSubmission['status'] = 'ممتاز';
+    if (pct < 50) status = 'بحاجة لمتابعة';
+    else if (pct < 70) status = 'مقبول';
+    else if (pct < 80) status = 'جيد';
+    else if (pct < 90) status = 'جيد جداً';
+
+    if (onRecordSubmission) {
+      const details = questions.map((q, idx) => {
+        const studentAnsId = answers[idx];
+        const studentAnsText = studentAnsId
+          ? q.options.find((o) => o.id === studentAnsId)?.text || studentAnsId
+          : 'لم يُجب';
+        const correctAnsText =
+          q.options.find((o) => o.id === q.correctAnswer)?.text || q.correctAnswer;
+
+        return {
+          questionNumber: idx + 1,
+          questionText: q.text,
+          studentAnswer: studentAnsId ? `(${studentAnsId}) ${studentAnsText}` : 'لم تتم الإجابة',
+          correctAnswer: `(${q.correctAnswer}) ${correctAnsText}`,
+          isCorrect: studentAnsId === q.correctAnswer,
+        };
+      });
+
+      const spentSecs = 25 * 60 - totalSecondsLeft;
+      const spentMins = Math.max(1, Math.round(spentSecs / 60));
+
+      onRecordSubmission({
+        studentName: student.name,
+        section: student.section,
+        activityType: 'assessment',
+        activityTitle: 'محاكاة التقييم الإلكتروني الشامل (الوحدة 1 و 2)',
+        score: finalScore,
+        maxScore: totalQuestions * 10,
+        percentage: pct,
+        correctCount,
+        totalQuestions,
+        status,
+        timeSpentMinutes: spentMins,
+        details,
+      });
+    }
 
     playVictorySound();
     confetti({
@@ -214,7 +268,22 @@ export const AssessmentMode: React.FC<AssessmentModeProps> = ({
             </div>
           </div>
 
+          {/* Recorded Notification Banner */}
+          <div className="max-w-xl mx-auto my-4 p-3 bg-emerald-50 border border-emerald-300 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold text-emerald-900">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+            <span>تم حفظ نتيجتك بنجاح وتسجيل اسمك في سجل طلبة مدرسة الريان الخاصة!</span>
+          </div>
+
           <div className="flex flex-wrap items-center justify-center gap-3">
+            {onNavigateToStudentsList && (
+              <button
+                onClick={onNavigateToStudentsList}
+                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-sm flex items-center gap-2 cursor-pointer transition-colors"
+              >
+                <Users className="w-4 h-4" />
+                <span>عرض اسمك في قائمة الطلبة وسجل الدرجات</span>
+              </button>
+            )}
             <button
               id="view-certificate-btn"
               onClick={() => {

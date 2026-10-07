@@ -64,10 +64,42 @@ export interface DragDropActivity {
 
 export interface StudentProfile {
   name: string;
-  section: string; // e.g., سابع 1، سابع 2
+  section: string; // e.g., الصف الثامن / 1
   score: number;
-  streak: number;
-  badges: string[];
+  streak?: number;
+  badges?: string[];
 }
 
-export type AppMode = 'adventure' | 'assessment' | 'practice_mcq' | 'practice_essay' | 'drag_drop' | 'summary';
+export interface StudentSubmission {
+  id: string;
+  studentName: string;
+  section: string;
+  activityType: 'assessment' | 'adventure' | 'practice_mcq' | 'practice_essay' | 'drag_drop';
+  activityTitle: string;
+  score: number;
+  maxScore: number;
+  percentage: number;
+  correctCount: number;
+  totalQuestions: number;
+  timestamp: string;
+  formattedDate: string;
+  timeSpentMinutes?: number;
+  status: 'ممتاز' | 'جيد جداً' | 'جيد' | 'مقبول' | 'بحاجة لمتابعة';
+  details?: {
+    questionNumber: number;
+    questionText: string;
+    studentAnswer: string;
+    correctAnswer: string;
+    isCorrect: boolean;
+  }[];
+}
+
+export type AppMode =
+  | 'adventure'
+  | 'assessment'
+  | 'drag_drop'
+  | 'practice_essay'
+  | 'practice_mcq'
+  | 'summary'
+  | 'students_list';
+
